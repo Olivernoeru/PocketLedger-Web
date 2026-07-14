@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PocketLedger Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>PocketLedger</h1>
+    
+    <div class="card saldo-box animate-card">
+        <p style="margin: 0; font-size: 0.9rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Sisa Saldo</p>
+        <h2>Rp {{ saldo | rupiah }}</h2>
+    </div>
+
+    <div id="alert-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="card form-box animate-card">
+        <h3>{% if data_edit %}Ubah Transaksi #{{ data_edit.id_transaksi }}{% else %}Catat Transaksi Baru{% endif %}</h3>
+        
+        <form action="{{ url_for('simpan') }}" method="POST">
+            {% if data_edit %}
+                <input type="hidden" name="id_transaksi" value="{{ data_edit.id_transaksi }}">
+            {% endif %}
+
+            <label for="tipe">Tipe Transaksi:</label>
+            <select name="tipe" id="tipe" class="{% if data_edit %}lock-select{% endif %}" {% if data_edit %}tabindex="-1"{% endif %} required>
+                <option value="pemasukan" {% if data_edit and data_edit.tipe == 'pemasukan' %}selected{% endif %}>Pemasukan</option>
+                <option value="pengeluaran" {% if data_edit and data_edit.tipe == 'pengeluaran' %}selected{% endif %}>Pengeluaran</option>
+            </select>
+            
+            <label for="nominal">Nominal (Rp):</label>
+            <input type="number" name="nominal" id="nominal" value="{% if data_edit %}{{ data_edit.nominal }}{% endif %}" placeholder="Misal: 50000" required min="1">
+            
+            <label for="kategori">Kategori:</label>
+            <select name="kategori" id="kategori">
+                <option value="Makan" {% if data_edit and data_edit.kategori == 'Makan' %}selected{% endif %}>Makan</option>
+                <option value="Transportasi" {% if data_edit and data_edit.kategori == 'Transportasi' %}selected{% endif %}>Transportasi</option>
+                <option value="Belanja" {% if data_edit and data_edit.kategori == 'Belanja' %}selected{% endif %}>Belanja</option>
+                <option value="Ngopi" {% if data_edit and data_edit.kategori == 'Ngopi' %}selected{% endif %}>Ngopi</option>
+                <option value="Nongkrong" {% if data_edit and data_edit.kategori == 'Nongkrong' %}selected{% endif %}>Nongkrong</option>
+                <option value="Lainnya" {% if data_edit and data_edit.kategori == 'Lainnya' %}selected{% endif %}>Lainnya</option>
+                <option value="Pemasukan" {% if data_edit and data_edit.kategori == 'Pemasukan' %}selected{% endif %} style="display:none;">Pemasukan</option>
+            </select>
+            
+            <button type="submit" class="{% if data_edit %}btn-update{% else %}btn-submit{% endif %}">
+                {% if data_edit %}Simpan Perubahan{% else %}Tambahkan Transaksi{% endif %}
+            </button>
+            
+            {% if data_edit %}
+                <a href="{{ url_for('index') }}" style="display: block; text-align: center; margin-top: 15px; color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 600; font-size: 0.9rem;">Batalkan Perubahan</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="card riwayat-box animate-card">
+        <h3>Riwayat Transaksi</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Kategori</th>
+                    <th>Tipe</th>
+                    <th>Nominal</th>
+                    <th>Aksi</th>
+                </tr>
+                {% for item in transaksi %}
+                <tr>
+                    <td>#{{ item.id_transaksi }}</td>
+                    <td><strong>{{ item.kategori }}</strong></td>
+                    <td>
+                        <span class="badge badge-{{ item.tipe }}">
+                            {{ item.tipe|capitalize }}
+                        </span>
+                    </td>
+                    <td style="font-weight: 600;">Rp {{ item.nominal | rupiah }}</td>
+                    <td>
+                        <a href="{{ url_for('index', edit_id=item.id_transaksi) }}" class="btn-edit">Edit</a>
+                        <a href="{{ url_for('hapus', id=item.id_transaksi) }}" class="btn-hapus" onclick="return confirm('Yakin mau hapus transaksi ini?');">Hapus</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: rgba(255,255,255,0.7); padding: 30px;">Belum ada catatan transaksi. Mulai catat keuanganmu!</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,317 +1,221 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-    /* ==========================================
+  /* ==========================================
        CARD REVEAL
     ========================================== */
 
-    const cards = document.querySelectorAll(".animate-card");
+  const cards = document.querySelectorAll(".animate-card");
 
-    const observer = new IntersectionObserver((entries) => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.style.animation =
+              "fadeUp .7s cubic-bezier(.22,1,.36,1) forwards";
+          }, index * 120);
 
-        entries.forEach((entry, index) => {
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.15,
+    },
+  );
 
-            if (entry.isIntersecting) {
+  cards.forEach((card) => observer.observe(card));
 
-                setTimeout(() => {
-
-                    entry.target.style.animation =
-                        "fadeUp .7s cubic-bezier(.22,1,.36,1) forwards";
-
-                }, index * 120);
-
-                observer.unobserve(entry.target);
-
-            }
-
-        });
-
-    }, {
-
-        threshold: .15
-
-    });
-
-    cards.forEach(card => observer.observe(card));
-
-
-
-    /* ==========================================
+  /* ==========================================
        ALERT AUTO CLOSE
     ========================================== */
 
-    document.querySelectorAll(".alert").forEach(alert => {
+  document.querySelectorAll(".alert").forEach((alert) => {
+    setTimeout(() => {
+      alert.style.opacity = "0";
 
-        setTimeout(() => {
+      alert.style.transform = "translateY(-15px)";
 
-            alert.style.opacity = "0";
+      setTimeout(() => {
+        alert.remove();
+      }, 500);
+    }, 3500);
+  });
 
-            alert.style.transform = "translateY(-15px)";
-
-            setTimeout(() => {
-
-                alert.remove();
-
-            }, 500);
-
-        }, 3500);
-
-    });
-
-
-
-    /* ==========================================
+  /* ==========================================
        BALANCE COUNTER
     ========================================== */
 
-    const balance = document.querySelector(".balance-number");
+  const balance = document.querySelector(".balance-number");
 
-    if (balance) {
+  if (balance) {
+    const original = balance.textContent;
 
-        const original = balance.textContent;
+    const number = Number(original.replace(/[^\d]/g, ""));
 
-        const number = Number(
+    let current = 0;
 
-            original.replace(/[^\d]/g, "")
+    const duration = 1000;
 
-        );
+    const fps = 60;
 
-        let current = 0;
+    const increment = number / (duration / (1000 / fps));
 
-        const duration = 1000;
+    const counter = setInterval(() => {
+      current += increment;
 
-        const fps = 60;
+      if (current >= number) {
+        current = number;
 
-        const increment = number / (duration / (1000 / fps));
+        clearInterval(counter);
+      }
 
-        const counter = setInterval(() => {
+      balance.textContent = "Rp " + Math.floor(current).toLocaleString("id-ID");
+    }, 1000 / fps);
+  }
 
-            current += increment;
-
-            if (current >= number) {
-
-                current = number;
-
-                clearInterval(counter);
-
-            }
-
-            balance.textContent =
-                "Rp " +
-                Math.floor(current)
-                .toLocaleString("id-ID");
-
-        }, 1000 / fps);
-
-    }
-
-
-
-    /* ==========================================
+  /* ==========================================
        RIPPLE BUTTON
     ========================================== */
 
-    document.querySelectorAll("button").forEach(button => {
+  document.querySelectorAll("button").forEach((button) => {
+    button.style.position = "relative";
 
-        button.style.position = "relative";
+    button.style.overflow = "hidden";
 
-        button.style.overflow = "hidden";
+    button.addEventListener("click", function (e) {
+      const ripple = document.createElement("span");
 
-        button.addEventListener("click", function (e) {
+      const size = Math.max(
+        this.offsetWidth,
 
-            const ripple = document.createElement("span");
+        this.offsetHeight,
+      );
 
-            const size = Math.max(
+      ripple.style.width = size + "px";
 
-                this.offsetWidth,
+      ripple.style.height = size + "px";
 
-                this.offsetHeight
+      ripple.style.position = "absolute";
 
-            );
+      ripple.style.borderRadius = "50%";
 
-            ripple.style.width = size + "px";
+      ripple.style.background = "rgba(255,255,255,.35)";
 
-            ripple.style.height = size + "px";
+      ripple.style.left = e.offsetX - size / 2 + "px";
 
-            ripple.style.position = "absolute";
+      ripple.style.top = e.offsetY - size / 2 + "px";
 
-            ripple.style.borderRadius = "50%";
+      ripple.style.pointerEvents = "none";
 
-            ripple.style.background =
-                "rgba(255,255,255,.35)";
+      ripple.style.transform = "scale(0)";
 
-            ripple.style.left =
-                e.offsetX - size / 2 + "px";
+      ripple.style.transition = "transform .6s ease, opacity .6s ease";
 
-            ripple.style.top =
-                e.offsetY - size / 2 + "px";
+      this.appendChild(ripple);
 
-            ripple.style.pointerEvents = "none";
+      requestAnimationFrame(() => {
+        ripple.style.transform = "scale(4)";
 
-            ripple.style.transform = "scale(0)";
+        ripple.style.opacity = "0";
+      });
 
-            ripple.style.transition =
-                "transform .6s ease, opacity .6s ease";
-
-            this.appendChild(ripple);
-
-            requestAnimationFrame(() => {
-
-                ripple.style.transform = "scale(4)";
-
-                ripple.style.opacity = "0";
-
-            });
-
-            setTimeout(() => {
-
-                ripple.remove();
-
-            }, 650);
-
-        });
-
+      setTimeout(() => {
+        ripple.remove();
+      }, 650);
     });
+  });
 
-
-
-    /* ==========================================
+  /* ==========================================
        INPUT FOCUS
     ========================================== */
 
-    document.querySelectorAll("input, select").forEach(input => {
-
-        input.addEventListener("focus", () => {
-
-            input.parentElement.classList.add("focused");
-
-        });
-
-        input.addEventListener("blur", () => {
-
-            input.parentElement.classList.remove("focused");
-
-        });
-
+  document.querySelectorAll("input, select").forEach((input) => {
+    input.addEventListener("focus", () => {
+      input.parentElement.classList.add("focused");
     });
 
+    input.addEventListener("blur", () => {
+      input.parentElement.classList.remove("focused");
+    });
+  });
 
-
-    /* ==========================================
+  /* ==========================================
        TABLE HOVER
     ========================================== */
 
-    document.querySelectorAll("tbody tr").forEach(row => {
-
-        row.addEventListener("mouseenter", () => {
-
-            row.style.transform = "translateX(6px)";
-
-        });
-
-        row.addEventListener("mouseleave", () => {
-
-            row.style.transform = "translateX(0px)";
-
-        });
-
+  document.querySelectorAll("tbody tr").forEach((row) => {
+    row.addEventListener("mouseenter", () => {
+      row.style.transform = "translateX(6px)";
     });
 
+    row.addEventListener("mouseleave", () => {
+      row.style.transform = "translateX(0px)";
+    });
+  });
 
-
-    /* ==========================================
+  /* ==========================================
        PARALLAX HERO
     ========================================== */
 
-    const hero = document.querySelector(".hero");
+  const hero = document.querySelector(".hero");
 
-    window.addEventListener("mousemove", (e) => {
+  window.addEventListener("mousemove", (e) => {
+    if (!hero) return;
 
-        if (!hero) return;
+    const x = (window.innerWidth / 2 - e.clientX) / 60;
 
-        const x = (window.innerWidth / 2 - e.clientX) / 60;
+    const y = (window.innerHeight / 2 - e.clientY) / 60;
 
-        const y = (window.innerHeight / 2 - e.clientY) / 60;
+    hero.style.transform = `translate(${x}px, ${y}px)`;
+  });
 
-        hero.style.transform =
-            `translate(${x}px, ${y}px)`;
-
-    });
-
-
-
-    /* ==========================================
+  /* ==========================================
        NAV SHADOW ON SCROLL
     ========================================== */
 
-    window.addEventListener("scroll", () => {
+  window.addEventListener("scroll", () => {
+    const card = document.querySelector(".balance-card");
 
-        const card = document.querySelector(".balance-card");
+    if (!card) return;
 
-        if (!card) return;
+    if (window.scrollY > 20) {
+      card.style.boxShadow = "0 35px 80px rgba(0,0,0,.55)";
+    } else {
+      card.style.boxShadow = "";
+    }
+  });
 
-        if (window.scrollY > 20) {
-
-            card.style.boxShadow =
-                "0 35px 80px rgba(0,0,0,.55)";
-
-        } else {
-
-            card.style.boxShadow = "";
-
-        }
-
-    });
-
-
-
-    /* ==========================================
+  /* ==========================================
        BUTTON HOVER SCALE
     ========================================== */
 
-    document.querySelectorAll(
-        ".btn-submit,.btn-update,.btn-edit,.btn-delete"
-    ).forEach(btn => {
+  document
+    .querySelectorAll(".btn-submit,.btn-update,.btn-edit,.btn-delete")
+    .forEach((btn) => {
+      btn.addEventListener("mouseenter", () => {
+        btn.style.transform = "translateY(-3px) scale(1.02)";
+      });
 
-        btn.addEventListener("mouseenter", () => {
-
-            btn.style.transform = "translateY(-3px) scale(1.02)";
-
-        });
-
-        btn.addEventListener("mouseleave", () => {
-
-            btn.style.transform = "";
-
-        });
-
+      btn.addEventListener("mouseleave", () => {
+        btn.style.transform = "";
+      });
     });
 
-
-
-    /* ==========================================
+  /* ==========================================
        FLOATING BACKGROUND
     ========================================== */
 
-    const blur1 = document.querySelector(".blur-1");
+  const blur1 = document.querySelector(".blur-1");
 
-    const blur2 = document.querySelector(".blur-2");
+  const blur2 = document.querySelector(".blur-2");
 
-    window.addEventListener("mousemove", (e) => {
+  window.addEventListener("mousemove", (e) => {
+    if (blur1) {
+      blur1.style.transform = `translate(${e.clientX * 0.015}px,${e.clientY * 0.015}px)`;
+    }
 
-        if (blur1) {
-
-            blur1.style.transform =
-                `translate(${e.clientX * .015}px,${e.clientY * .015}px)`;
-
-        }
-
-        if (blur2) {
-
-            blur2.style.transform =
-                `translate(${-e.clientX * .01}px,${-e.clientY * .01}px)`;
-
-        }
-
-    });
-
+    if (blur2) {
+      blur2.style.transform = `translate(${-e.clientX * 0.01}px,${-e.clientY * 0.01}px)`;
+    }
+  });
 });

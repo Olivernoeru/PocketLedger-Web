@@ -1,442 +1,396 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>PocketLedger</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-</head>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-<body>
-
+  <body>
     <div class="background-grid"></div>
     <div class="background-blur blur-1"></div>
     <div class="background-blur blur-2"></div>
 
     <main class="container">
+      <!-- ===================== HERO ===================== -->
 
-        <!-- ===================== HERO ===================== -->
+      <section class="hero animate-card">
+        <div class="hero-left">
+          <span class="hero-badge"> Personal Finance Dashboard </span>
 
-        <section class="hero animate-card">
+          <h1>PocketLedger</h1>
 
-            <div class="hero-left">
-
-                <span class="hero-badge">
-                    Personal Finance Dashboard
-                </span>
-
-                <h1>
-                    PocketLedger
-                </h1>
-
-                <p>
-                    Kelola pemasukan dan pengeluaran dengan tampilan modern,
-                    sederhana, dan nyaman digunakan setiap hari.
-                </p>
-
-            </div>
-
-            <div class="hero-right">
-
-                <div class="balance-card">
-
-                    <span class="balance-title">
-                        Current Balance
-                    </span>
-
-                    <h2 class="balance-number">
-                        Rp {{ saldo | rupiah }}
-                    </h2>
-
-                    <small>
-                        Seluruh transaksi dihitung secara realtime
-                    </small>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- ===================== ALERT ===================== -->
-
-        <div id="alert-container">
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-
-            {% for category, message in messages %}
-
-            <div class="alert alert-{{ category }}">
-                <span>{{ message }}</span>
-            </div>
-
-            {% endfor %}
-
-            {% endif %}
-            {% endwith %}
-
+          <p>
+            Kelola pemasukan dan pengeluaran dengan tampilan modern, sederhana,
+            dan nyaman digunakan setiap hari.
+          </p>
         </div>
 
-        <!-- ===================== CONTENT ===================== -->
+        <div class="hero-right">
+          <div class="balance-card">
+            <span class="balance-title"> Current Balance </span>
 
-        <section class="content-grid">
+            <h2 class="balance-number">Rp {{ saldo | rupiah }}</h2>
 
-            <!-- ===================== FORM ===================== -->
+            <small> Seluruh transaksi dihitung secara realtime </small>
+          </div>
+        </div>
+      </section>
 
-            <div class="glass-card form-card animate-card">
+      <!-- ===================== ALERT ===================== -->
 
-                <div class="card-header">
+      <div id="alert-container">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
 
-                    <h3>
+        <div class="alert alert-{{ category }}">
+          <span>{{ message }}</span>
+        </div>
 
-                        {% if data_edit %}
+        {% endfor %} {% endif %} {% endwith %}
+      </div>
 
-                        Edit Transaksi
+      <!-- ===================== CONTENT ===================== -->
 
-                        {% else %}
+      <section class="content-grid">
+        <!-- ===================== FORM ===================== -->
 
-                        Tambah Transaksi
+        <div class="glass-card form-card animate-card">
+          <div class="card-header">
+            <h3>
+              {% if data_edit %} Edit Transaksi {% else %} Tambah Transaksi {%
+              endif %}
+            </h3>
 
-                        {% endif %}
+            <p>
+              {% if data_edit %} Ubah data transaksi yang dipilih. {% else %}
+              Catat pemasukan maupun pengeluaran. {% endif %}
+            </p>
+          </div>
 
-                    </h3>
+          <form action="{{ url_for('simpan') }}" method="POST">
+            {% if data_edit %}
+            <input
+              type="hidden"
+              name="id_transaksi"
+              value="{{ data_edit.id_transaksi }}"
+            />
+            {% endif %}
 
-                    <p>
+            <div class="input-group">
+              <label>Tipe Transaksi</label>
 
-                        {% if data_edit %}
+              <select
+                name="tipe"
+                id="tipe"
+                class="{% if data_edit %}lock-select{% endif %}"
+                {%
+                if
+                data_edit
+                %}tabindex="-1"
+                {%
+                endif
+                %}
+                required
+              >
+                <option
+                  value="pemasukan"
+                  {%
+                  if
+                  data_edit
+                  and
+                  data_edit.tipe=""
+                  ="pemasukan"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  Pemasukan
+                </option>
 
-                        Ubah data transaksi yang dipilih.
-
-                        {% else %}
-
-                        Catat pemasukan maupun pengeluaran.
-
-                        {% endif %}
-
-                    </p>
-
-                </div>
-
-                <form action="{{ url_for('simpan') }}" method="POST">
-
-                    {% if data_edit %}
-                    <input type="hidden"
-                           name="id_transaksi"
-                           value="{{ data_edit.id_transaksi }}">
-                    {% endif %}
-
-                    <div class="input-group">
-
-                        <label>Tipe Transaksi</label>
-
-                        <select
-                            name="tipe"
-                            id="tipe"
-                            class="{% if data_edit %}lock-select{% endif %}"
-                            {% if data_edit %}tabindex="-1"{% endif %}
-                            required>
-
-                            <option value="pemasukan"
-                                {% if data_edit and data_edit.tipe=='pemasukan' %}selected{% endif %}>
-                                Pemasukan
-                            </option>
-
-                            <option value="pengeluaran"
-                                {% if data_edit and data_edit.tipe=='pengeluaran' %}selected{% endif %}>
-                                Pengeluaran
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                    <div class="input-group">
-
-                        <label>Nominal</label>
-
-                        <input
-                            type="number"
-                            name="nominal"
-                            id="nominal"
-                            placeholder="Masukkan nominal..."
-
-                            value="{% if data_edit %}{{ data_edit.nominal }}{% endif %}"
-
-                            required
-                            min="1">
-
-                    </div>
-
-                    <div class="input-group">
-
-                        <label>Kategori</label>
-
-                        <select
-                            name="kategori"
-                            id="kategori">
-
-                            <option value="Makan"
-                                {% if data_edit and data_edit.kategori=="Makan" %}selected{% endif %}>
-                                🍜 Makan
-                            </option>
-
-                            <option value="Transportasi"
-                                {% if data_edit and data_edit.kategori=="Transportasi" %}selected{% endif %}>
-                                🚗 Transportasi
-                            </option>
-
-                            <option value="Belanja"
-                                {% if data_edit and data_edit.kategori=="Belanja" %}selected{% endif %}>
-                                🛍 Belanja
-                            </option>
-
-                            <option value="Ngopi"
-                                {% if data_edit and data_edit.kategori=="Ngopi" %}selected{% endif %}>
-                                ☕ Ngopi
-                            </option>
-
-                            <option value="Nongkrong"
-                                {% if data_edit and data_edit.kategori=="Nongkrong" %}selected{% endif %}>
-                                🍻 Nongkrong
-                            </option>
-
-                            <option value="Lainnya"
-                                {% if data_edit and data_edit.kategori=="Lainnya" %}selected{% endif %}>
-                                📦 Lainnya
-                            </option>
-
-                            <option value="Pemasukan"
-                                style="display:none;"
-                                {% if data_edit and data_edit.kategori=="Pemasukan" %}selected{% endif %}>
-                                Pemasukan
-                            </option>
-
-                        </select>
-
-                    </div>
-                                        <div class="form-action">
-
-                        <button
-                            type="submit"
-                            class="{% if data_edit %}btn-update{% else %}btn-submit{% endif %}">
-
-                            {% if data_edit %}
-
-                            <span>Simpan Perubahan</span>
-
-                            {% else %}
-
-                            <span>Tambah Transaksi</span>
-
-                            {% endif %}
-
-                        </button>
-
-                        {% if data_edit %}
-
-                        <a
-                            href="{{ url_for('index') }}"
-                            class="btn-cancel">
-
-                            Batalkan
-
-                        </a>
-
-                        {% endif %}
-
-                    </div>
-
-                </form>
-
+                <option
+                  value="pengeluaran"
+                  {%
+                  if
+                  data_edit
+                  and
+                  data_edit.tipe=""
+                  ="pengeluaran"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  Pengeluaran
+                </option>
+              </select>
             </div>
 
-            <!-- ===================== HISTORY ===================== -->
+            <div class="input-group">
+              <label>Nominal</label>
 
-            <div class="glass-card history-card animate-card">
+              <input
+                type="number"
+                name="nominal"
+                id="nominal"
+                placeholder="Masukkan nominal..."
+                value="{% if data_edit %}{{ data_edit.nominal }}{% endif %}"
+                required
+                min="1"
+              />
+            </div>
 
-                <div class="card-header">
+            <div class="input-group">
+              <label>Kategori</label>
 
-                    <div>
+              <select name="kategori" id="kategori">
+                <option
+                  value="Makan"
+                  {%
+                  if
+                  data_edit
+                  and
+                  data_edit.kategori=""
+                  ="Makan"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  🍜 Makan
+                </option>
 
-                        <h3>Riwayat Transaksi</h3>
+                <option
+                  value="Transportasi"
+                  {%
+                  if
+                  data_edit
+                  and
+                  data_edit.kategori=""
+                  ="Transportasi"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  🚗 Transportasi
+                </option>
 
-                        <p>
-                            Semua transaksi yang telah tersimpan.
-                        </p>
+                <option
+                  value="Belanja"
+                  {%
+                  if
+                  data_edit
+                  and
+                  data_edit.kategori=""
+                  ="Belanja"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  🛍 Belanja
+                </option>
 
+                <option
+                  value="Ngopi"
+                  {%
+                  if
+                  data_edit
+                  and
+                  data_edit.kategori=""
+                  ="Ngopi"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  ☕ Ngopi
+                </option>
+
+                <option
+                  value="Nongkrong"
+                  {%
+                  if
+                  data_edit
+                  and
+                  data_edit.kategori=""
+                  ="Nongkrong"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  🍻 Nongkrong
+                </option>
+
+                <option
+                  value="Lainnya"
+                  {%
+                  if
+                  data_edit
+                  and
+                  data_edit.kategori=""
+                  ="Lainnya"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  📦 Lainnya
+                </option>
+
+                <option
+                  value="Pemasukan"
+                  style="display: none"
+                  {%
+                  if
+                  data_edit
+                  and
+                  data_edit.kategori=""
+                  ="Pemasukan"
+                  %}selected{%
+                  endif
+                  %}
+                >
+                  Pemasukan
+                </option>
+              </select>
+            </div>
+            <div class="form-action">
+              <button
+                type="submit"
+                class="{% if data_edit %}btn-update{% else %}btn-submit{% endif %}"
+              >
+                {% if data_edit %}
+
+                <span>Simpan Perubahan</span>
+
+                {% else %}
+
+                <span>Tambah Transaksi</span>
+
+                {% endif %}
+              </button>
+
+              {% if data_edit %}
+
+              <a href="{{ url_for('index') }}" class="btn-cancel"> Batalkan </a>
+
+              {% endif %}
+            </div>
+          </form>
+        </div>
+
+        <!-- ===================== HISTORY ===================== -->
+
+        <div class="glass-card history-card animate-card">
+          <div class="card-header">
+            <div>
+              <h3>Riwayat Transaksi</h3>
+
+              <p>Semua transaksi yang telah tersimpan.</p>
+            </div>
+
+            <span class="history-count"> {{ transaksi|length }} Data </span>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+
+                  <th>Kategori</th>
+
+                  <th>Tipe</th>
+
+                  <th>Nominal</th>
+
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for item in transaksi %}
+
+                <tr>
+                  <td>
+                    <span class="table-id"> #{{ item.id_transaksi }} </span>
+                  </td>
+
+                  <td>
+                    <div class="category">
+                      <span class="category-dot"></span>
+
+                      {{ item.kategori }}
                     </div>
+                  </td>
 
-                    <span class="history-count">
-
-                        {{ transaksi|length }}
-
-                        Data
-
+                  <td>
+                    <span class="badge badge-{{ item.tipe }}">
+                      {% if item.tipe == "pemasukan" %} ↑ Pemasukan {% else %} ↓
+                      Pengeluaran {% endif %}
                     </span>
-
-                </div>
-
-                <div class="table-wrapper">
-
-                    <table>
-
-                        <thead>
-
-                            <tr>
-
-                                <th>ID</th>
-
-                                <th>Kategori</th>
-
-                                <th>Tipe</th>
-
-                                <th>Nominal</th>
-
-                                <th>Aksi</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            {% for item in transaksi %}
-
-                            <tr>
-
-                                <td>
-
-                                    <span class="table-id">
-
-                                        #{{ item.id_transaksi }}
-
-                                    </span>
-
-                                </td>
-
-                                <td>
-
-                                    <div class="category">
-
-                                        <span class="category-dot"></span>
-
-                                        {{ item.kategori }}
-
-                                    </div>
-
-                                </td>
-
-                                <td>
-
-                                    <span
-                                        class="badge badge-{{ item.tipe }}">
-
-                                        {% if item.tipe == "pemasukan" %}
-
-                                        ↑ Pemasukan
-
-                                        {% else %}
-
-                                        ↓ Pengeluaran
-
-                                        {% endif %}
-
-                                    </span>
-
-                                </td>
-
-                                <td class="nominal">
-
-                                    Rp {{ item.nominal | rupiah }}
-
-                                </td>
-
-                                <td>
-
-                                    <div class="table-action">
-
-                                        <a
-                                            href="{{ url_for('index', edit_id=item.id_transaksi) }}"
-                                            class="btn-edit">
-
-                                            Edit
-
-                                        </a>
-
-                                        <a
-                                            href="{{ url_for('hapus', id=item.id_transaksi) }}"
-                                            class="btn-delete"
-                                            onclick="return confirm('Yakin ingin menghapus transaksi ini?');">
-
-                                            Hapus
-
-                                        </a>
-
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
-                            {% else %}
-
-                            <tr>
-
-                                <td colspan="5">
-
-                                    <div class="empty-state">
-
-                                        <div class="empty-icon">
-
-                                            💳
-
-                                        </div>
-
-                                        <h4>
-
-                                            Belum Ada Transaksi
-
-                                        </h4>
-
-                                        <p>
-
-                                            Mulai catat pemasukan ataupun
-                                            pengeluaran pertamamu.
-
-                                        </p>
-
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
-                            {% endfor %}
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-        </section>
-
+                  </td>
+
+                  <td class="nominal">Rp {{ item.nominal | rupiah }}</td>
+
+                  <td>
+                    <div class="table-action">
+                      <a
+                        href="{{ url_for('index', edit_id=item.id_transaksi) }}"
+                        class="btn-edit"
+                      >
+                        Edit
+                      </a>
+
+                      <a
+                        href="{{ url_for('hapus', id=item.id_transaksi) }}"
+                        class="btn-delete"
+                        onclick="
+                          return confirm(
+                            'Yakin ingin menghapus transaksi ini?',
+                          );
+                        "
+                      >
+                        Hapus
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+
+                {% else %}
+
+                <tr>
+                  <td colspan="5">
+                    <div class="empty-state">
+                      <div class="empty-icon">💳</div>
+
+                      <h4>Belum Ada Transaksi</h4>
+
+                      <p>
+                        Mulai catat pemasukan ataupun pengeluaran pertamamu.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-
-</body>
-
+  </body>
 </html>
